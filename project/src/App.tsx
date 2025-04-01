@@ -55,6 +55,9 @@ function App() {
       const pdfBytes = await pdfFile.arrayBuffer();
       const pdfDoc = await PDFDocument.load(pdfBytes);
 
+      // Create array to store all PDF data
+      const pdfsToDownload = [];
+
       for (const row of excelData) {
         const newPdf = await PDFDocument.create();
         // Register fontkit
@@ -77,32 +80,14 @@ function App() {
         });
         const pages = newPdf.getPages();
 
-        mappings.forEach(async (mapping) => {
-          try {
+        // Draw text for all mappings
+        await Promise.all(
+          mappings.map(async (mapping) => {
             const page = pages[mapping.page - 1];
             if (!page) {
               console.error(`Page ${mapping.page} not found`);
               return;
             }
-            const { height } = page.getSize();
-            const value = String(row[mapping.field] || "");
-
-            page.drawText(value, {
-              x: mapping.x,
-              y: height - mapping.y - 5,
-              font: customFont,
-              size: 10,
-            });
-          } catch (error) {
-            console.error(`Error processing mapping:`, error);
-          }
-        });
-
-        // Wait for all text to be drawn before saving
-        await Promise.all(
-          mappings.map(async (mapping) => {
-            const page = pages[mapping.page - 1];
-            if (!page) return;
             const { height } = page.getSize();
             const value = String(row[mapping.field] || "");
 
@@ -116,10 +101,6 @@ function App() {
         );
 
         const modifiedPdfBytes = await newPdf.save();
-        const blob = new Blob([modifiedPdfBytes], { type: "application/pdf" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
 
         // Get original filename without extension
         const originalName = pdfFile.name.replace(".pdf", "");
@@ -128,9 +109,27 @@ function App() {
         // Combine filename
         const newFilename = `${originalName}-${fieldValue}.pdf`;
 
-        a.download = newFilename;
+        pdfsToDownload.push({
+          bytes: modifiedPdfBytes,
+          filename: newFilename,
+        });
+      }
+
+      // Download PDFs with delay
+      for (let i = 0; i < pdfsToDownload.length; i++) {
+        const { bytes, filename } = pdfsToDownload[i];
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
+
+        // Add delay between downloads (500ms)
+        if (i < pdfsToDownload.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
       }
     } catch (error) {
       console.error("Error generating PDFs:", error);
