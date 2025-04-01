@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { read, utils } from "xlsx";
 import { PDFDocument } from "pdf-lib";
-import { Upload, Download } from "lucide-react";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import PDFViewer from "./components/PDFViewer";
 import type { FieldMapping, ExcelData } from "./types";
 import fontkit from "@pdf-lib/fontkit";
@@ -161,7 +162,7 @@ function App() {
                     htmlFor="pdf-upload"
                     className="flex flex-col items-center cursor-pointer"
                   >
-                    <Upload className="w-12 h-12 text-gray-400" />
+                    <CloudUploadIcon className="w-12 h-12 text-gray-400" />
                     <span className="mt-2 text-sm text-gray-500">
                       {pdfFile ? pdfFile.name : "Select PDF file"}
                     </span>
@@ -185,7 +186,7 @@ function App() {
                     htmlFor="excel-upload"
                     className="flex flex-col items-center cursor-pointer"
                   >
-                    <Upload className="w-12 h-12 text-gray-400" />
+                    <CloudUploadIcon className="w-12 h-12 text-gray-400" />
                     <span className="mt-2 text-sm text-gray-500">
                       {excelFile ? excelFile.name : "Select Excel file"}
                     </span>
@@ -230,7 +231,7 @@ function App() {
               disabled={!filenameField}
               className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Download className="w-5 h-5" />
+              <FileDownloadIcon className="w-5 h-5" />
               <span>Generate PDFs</span>
             </button>
           </div>
